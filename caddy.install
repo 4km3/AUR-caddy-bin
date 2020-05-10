@@ -1,16 +1,59 @@
+_define() {
+	read -r -d '' "${1}" || true
+}
+
+_define _CAVEAT_PRE_2_0 <<-'EOF'
+
+	CAVEAT EMPTOR
+
+	Backward incompatible change, requires manual intervention:
+
+	Caddy 2 is not backwards compatible with Caddy 1.x
+
+	Let me reiterate: YOUR CAREFULLY HANDCRAFTED Caddyfiles WON'T WORK!
+
+	YOU HAVE TO RECREATE THEM.
+
+	For details, peruse https://caddyserver.com/docs/v2-upgrade
+
+
+	Ye have been warned.  Arrr.
+EOF
+
+_is_older_than_2_0() {
+	local pkg_ver="$1"
+
+	test $(vercmp "$pkg_ver" '2.0') -lt 0
+}
+
+_notify_of_breaking_change() {
+	local new_pkg_ver="$1"	# not used
+	local old_pkg_ver="$2"
+
+	if _is_older_than_2_0 $old_pkg_ver; then
+		echo "$_CAVEAT_PRE_2_0"						\
+			| sed -e 's/.*\bCAVEAT.*/\x1b[5;1m&\x1b[0m/i'		\
+			      -e 's/.*\bincompatible.*/\x1b[1m&\x1b[0m/i'	\
+			      -e 's/\bCaddy 2/\x1b[1m&\x1b[0m/i'		\
+			      -e 's/\bCaddy 1.x/\x1b[1m&\x1b[0m/i'		\
+			      -e 's/.*\bwarned.*/\x1b[93;41m&\x1b[0m/i'
+	fi
+}
+
 post_install() {
-    systemctl --quiet preset caddy.service
+	systemctl --quiet preset caddy.service
 }
 
 post_upgrade() {
-    systemctl --quiet daemon-reload
-    systemctl --quiet try-restart caddy.service
+	systemctl --quiet daemon-reload
+	systemctl --quiet try-restart caddy.service
+	_notify_of_breaking_change
 }
 
 pre_remove() {
-    systemctl --quiet --no-reload disable --now caddy.service
+	systemctl --quiet --no-reload disable --now caddy.service
 }
 
 post_remove() {
-    systemctl --quiet daemon-reload
+	systemctl --quiet daemon-reload
 }

@@ -1,43 +1,53 @@
-# Maintainer: Rodrigo de la Fuente < rodrigo at delafuente dot email >
 # Maintainer: pancho horrillo < pancho at pancho dot name >
+# Maintainer: Rodrigo de la Fuente < rodrigo at delafuente dot email >
+# Contributor: Christian Rebischke <chris.rebischke at archlinux dot org>
 # Contributor: Maxime Borges < contact at maximeborg dot es >
 # Contributor: Carl George < arch at cgtx dot us >
 
 _name="caddy"
 pkgname="$_name-bin"
-pkgver=1.0.4
-pkgrel=3
-pkgdesc='HTTP/2 Web Server with Automatic HTTPS'
+pkgver=2.0.0
+_distcommit='3b4be6c14bf1e519380853c31ec1d56112cf9451'
+pkgrel=1
+pkgdesc='Powerful, enterprise-ready, open source web server with automatic HTTPS written in Go'
 arch=('x86_64' 'aarch64' 'armv7h')
 url='https://caddyserver.com'
 license=('Apache')
-backup=('etc/caddy/caddy.conf')
+backup=("etc/$_name/Caddyfile")
 provides=("$_name")
 conflicts=("$_name")
-install='caddy.install'
-source_x86_64=("https://github.com/mholt/caddy/releases/download/v${pkgver//_/-}/caddy_v${pkgver//_/-}_linux_amd64.tar.gz")
-source_aarch64=("https://github.com/mholt/caddy/releases/download/v${pkgver//_/-}/caddy_v${pkgver//_/-}_linux_arm64.tar.gz")
-source_armv7h=("https://github.com/mholt/caddy/releases/download/v${pkgver//_/-}/caddy_v${pkgver//_/-}_linux_arm7.tar.gz")
-source=('https://caddyserver.com/v1/resources/images/brand/caddy-at-your-service-white.svg'
-	'index.html'
-	'caddy.service'
-	'caddy.tmpfiles'
-	'caddy.conf')
-sha512sums=('fbe0a5bf505c414d9f7dc15b89efa3e03abeecd6e4674bac1db1d3ae6302977a0a605b9b9bc4b7a969f62c5dfa9aeeb0a0b7c705f1a8e793443ee51061d0a4c9'
-            '7d8d308c9e262f0a2d6b84e996858ce4c7bb4816660c6ad1bbdafbf01d0eb35720cdccb12cc3418547e0dad6dbe87a0e6a3d15d519fb7d44d32f03f126a15117'
-            'fa249c1fe22bd02cb7e6fbeaa5d31cf11cb61e89065597d17709425b1009b0bb9eb76de6a0ee5ec5c601712976a1b8819dd60e34c76eeb1e8f339f6363633e71'
-            '3bf3a0c568be72717e935bbe0864f8fd6d472278f9d49974aed0fda9032103002f0158bf0ad32f374f80c06300c46d26f4c69798845b45b5234f7bdc594f4041'
-            'c329cfa66428287cc554274790130f94f13d53d60a2d4ffba44a229913805f8bcf50e2df0073808009e57f026f2f0962d412cc38723719e6c248d90aaa4fdd33')
-sha512sums_x86_64=('c3e7ac2ad1cba15ef3184784a08c4f1dc3b867d551476a0902a9d04d08d975cb8786daebc3ae074f9026296cb3214a331b8bfbea909e7b1a3e51ade73382d42b')
-sha512sums_aarch64=('deaf5997d0378525ba0417361b56ed20e3a2f727c19519511251951709c443ae9cdb2b5530d82efa86042d45eb360306b10eccb2538969c80dcf88ca0d67f911')
-sha512sums_armv7h=('c783d1bbcdf473d4319dfe8bd38e301b92bacb5643337e51a4f0cb4143f9b690ab963af1d7cef20f29683f0962d2b2b6cd88d1760dfc46dfdfd6373e89b0e3d8')
+install="$_name.install"
+
+source=("https://github.com/caddyserver/$_name/releases/download/v$pkgver/${_name}_${pkgver}_checksums.txt"
+	"https://raw.githubusercontent.com/caddyserver/dist/${_distcommit}/welcome/index.html"
+	"$_name.conf::https://raw.githubusercontent.com/caddyserver/dist/${_distcommit}/archlinux/$_name.tmpfiles"
+	"https://raw.githubusercontent.com/caddyserver/dist/${_distcommit}/archlinux/$_name.service"
+	"https://raw.githubusercontent.com/caddyserver/dist/${_distcommit}/archlinux/Caddyfile")
+source_x86_64=("https://github.com/caddyserver/$_name/releases/download/v$pkgver/${_name}_${pkgver}_linux_amd64.tar.gz")
+source_aarch64=("https://github.com/caddyserver/$_name/releases/download/v$pkgver/${_name}_${pkgver}_linux_arm64.tar.gz")
+source_armv7h=("https://github.com/caddyserver/$_name/releases/download/v$pkgver/${_name}_${pkgver}_linux_armv7.tar.gz")
+sha256sums=('00150b4f8ac212644be54f8683b2f03248f216d2220021cfe341b9fb021fe733'
+	    '19dfa250bdb962c50a49eb94706482c5c3d4ecd6df41f667a4bb5649d0490ce4'
+	    'c8f002f5ba59985a643600dc3c871e18e110903aa945ef3f2da7c9edd39fbd7a'
+	    'c0fbb270ee1094babebb84a3bbb029f61f9475fcd5ac84cbc8d9ef384c9765e7'
+	    'f3919a12dd7ffe9b071e04e952a8ed3191c788ea42f103eac3e75d6819893279')
+sha256sums_x86_64=('09562b68cf3e68718171613c4e2c06a43a5390180ed9e2a2bc38ba85bfc935f7')
+sha256sums_aarch64=('ab9bcdaafddb71025542dc12e011e3a22d69582f14ff1a5a4ea87f5597c11e98')
+sha256sums_armv7h=('7486ea3907ba6c10b48402fa715dce111d1907672128703ba63e6d38a52013e7')
+
+prepare() {
+	# Fix path to html dir
+	sed -i 's|/var/www/html|/srv/http|g' index.html
+
+	# Disable file_service
+	sed -i 's|^file_server|# file_server|' Caddyfile
+}
 
 package() {
-    install -D -m 0755 caddy "$pkgdir/usr/bin/caddy"
-    install -D -m 0644 caddy-at-your-service-white.svg "$pkgdir/usr/share/caddy/caddy-at-your-service-white.svg"
-    install -D -m 0644 index.html "$pkgdir/usr/share/caddy/index.html"
-    install -D -m 0644 caddy.service "$pkgdir/usr/lib/systemd/system/caddy.service"
-    install -D -m 0644 caddy.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/caddy.conf"
-    install -D -m 0644 caddy.conf "$pkgdir/etc/caddy/caddy.conf"
-    install -d -m 0755 "$pkgdir/etc/caddy/conf.d"
+	install -Dm755 -t "$pkgdir/usr/bin"			"${_name}"
+	install -Dm644 -t "$pkgdir/etc/$_name"			Caddyfile
+	install -Dm644 -t "$pkgdir/usr/share/$_name"		index.html
+	install -Dm644 -t "$pkgdir/usr/share/doc/$_name"	README.md
+	install -Dm644 -t "$pkgdir/usr/lib/tmpfiles.d"		"$_name.conf"
+	install -Dm644 -t "$pkgdir/usr/lib/systemd/system"	"$_name.service"
 }
